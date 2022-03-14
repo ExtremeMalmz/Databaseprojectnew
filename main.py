@@ -14,10 +14,10 @@ def connectToServer():
     #this checks if you have wifi and  that passwords correct
     try:
         connection = psycopg2.connect(
-            user="aj0363",
-            password="tpdengsq",
+            user="MAU ID",
+            password="db password",
             host="pgserver.mau.se",
-            database="onlinestore3"
+            database="db name"
         )
         return connection
     except psycopg2.OperationalError:
