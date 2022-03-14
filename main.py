@@ -6,20 +6,25 @@ import psycopg2
 from customer import *
 from admin import *
 
+import logging
+
 def connectToServer():
     '''connects to the mau pgserver, makes sure you have wifi'''
     
-    #this checks if you have wifi
+    #this checks if you have wifi and  that passwords correct
     try:
         connection = psycopg2.connect(
-            user="your mau id",
-            password="your db password",
+            user="aj0363",
+            password="tpdengsq",
             host="pgserver.mau.se",
-            database="databasename"
+            database="onlinestore3"
         )
         return connection
     except psycopg2.OperationalError:
-        print("Your internet is off...turn it on!")
+        level = logging.INFO
+        fmt = '[%(levelname)s] %(asctime)s - %(message)s'
+        logging.basicConfig(level=level, format=fmt)
+        logging.info("There was a problem logging into the database OR your internet is off")
         exit()
 
 def menu_printer(message):
@@ -51,7 +56,6 @@ def searchProductName(connection):
 
     cursor = connection.cursor()
 
-    #Who made this a thing which uses tuples? Only works with two values at the end
     cursor.execute("SELECT * FROM Products WHERE productname = %s AND productname = %s", (productName,productName))
     records = cursor.fetchall()
     if records == []:

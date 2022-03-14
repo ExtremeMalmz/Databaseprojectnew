@@ -55,6 +55,10 @@ def search_by_ID(connection,date):
             discountPercentOriginal = row[6]
             discountPercent = float(discountPercentOriginal)/100
             totalPrice = int(discountPercent*basePrice)
+
+        if discountPercentOriginal == 100:
+            totalPrice = 0
+
         print(f"Discount amount: {discountPercentOriginal}%")
         print(f"Total price is {totalPrice}")
         
@@ -91,8 +95,47 @@ def search_by_name(connection,date):
             discountPercentOriginal = row[6]
             discountPercent = float(discountPercentOriginal)/100
             totalPrice = int(discountPercent*basePrice)
+
+        if discountPercentOriginal == 100:
+            totalPrice = 0
+            
         print(f"Discount amount: {discountPercentOriginal}%")
         print(f"Total price is {totalPrice}")
+
+def search_by_price(connection,date):
+    '''searches the products by price and includes discounts if found'''
+
+    print("You will search for a product between 2 prices")
+    lowestAmount = int(input("Enter the lowest price: "))
+    highestAmount = int(input("Enter the highest price: "))
+
+    cursor = connection.cursor()
+    cursor.execute("SELECT * FROM Products WHERE baseprice >= %s AND  baseprice <= %s", (lowestAmount,highestAmount))
+    records = cursor.fetchall()
+    if records == []:
+        print("No product found with these specifications!")
+    else:
+        for row in records:
+            print("Product ID: ", row[0]),
+            print("Product Name:", row[1]),
+            print("Baseprice : ", row[2]),
+            print("Supplier : ", row[3]),
+            print("Quantity : ", row[4])
+    
+            cursor.execute("SELECT discountpercentage FROM discountsAndProducts INNER JOIN discounts ON (discountsAndProducts.discountID = discounts.discountID AND discounts.startdate<=%s AND discounts.endDate >=%s)INNER JOIN products ON (discountsAndProducts.productID = products.productID AND baseprice >= %s AND  baseprice <= %s)",(date, date,lowestAmount,highestAmount))
+            records = cursor.fetchall()
+            if records is []:
+                print("No ongoing discounts for this product")
+            else:
+                for row in records:
+                    print("Discount amount: ", row[0],"%")
+            print("---")
+            
+            
+
+
+
+    cursor.close()
 
 def search_Discounts(connection,date):
     '''lists discounts available on the date which was inputted at the log in'''
@@ -120,7 +163,7 @@ def search_Products(connection,date):
     '''the main for searching products'''
 
     customer_menu_printer("Search for a product")
-    print("1-Search by ID \n2-Search by Product Name \n3-See all ongoing discounts \n4-Search by price \n")
+    print("1-Search by ID \n2-Search by Product Name \n3-Search by price \n4-See all ongoing discounts \n")
     userInput = str(input("Your choice: "))
     
     match userInput:
@@ -129,6 +172,8 @@ def search_Products(connection,date):
         case '2':
             search_by_name(connection,date)
         case '3':
+            search_by_price(connection,date)
+        case '4':
             search_Discounts(connection,date)
 
 
